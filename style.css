@@ -1,0 +1,649 @@
+/* 
+ * ============================================
+ * ============ MPE ULTIMATE THEME ============
+ * ============================================
+ * 融合特性：
+ * 1. 智能明暗模式 (基于 CSS 变量)
+ * 2. 修复章节计数逻辑 (5.11 -> 5.1)
+ * 3. MiSans 字体优先
+ * 4. macOS 风格代码块 (随主题变色)
+ * 5. 学术三线表
+ */
+
+/* --- 1. 变量定义 (配色核心) --- */
+.markdown-preview.markdown-preview {
+    /* 字体栈 */
+    --font-main: 'MiSans', 'MiSans-Normal', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    --font-code: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+    /* 尺寸 */
+    --base-font-size: 16px;
+    --line-height: 1.75;
+    --page-width: 21cm; /* 模拟 A4 宽度 */
+
+    /* --- Light Theme (白天) --- */
+    --bg-color: #ffffff; /* 纸张背景 */
+    --text-color: #24292f; /* 正文墨色 */
+    --heading-color: #000000; /* 标题纯黑 */
+    --link-color: #2e67d3; /* 链接蓝 */
+    --border-color: #000000; /* 表格粗线 */
+    --table-border: #d0d7de; /* 表格细线 */
+    --quote-border: #d0d7de; /* 引用边框 */
+
+    /* 代码块：白天使用浅灰背景，类似 GitHub */
+    --code-bg-color: #f6f8fa;
+    --code-text-color: #24292f;
+    --code-border: #d0d7de;
+
+    /* 计数器初始化 */
+    counter-reset: h2counter;
+}
+
+/* --- Dark Theme (黑夜) --- */
+@media (prefers-color-scheme: dark) {
+    .markdown-preview.markdown-preview {
+        --bg-color: #0d1117; /* 深色背景 */
+        --text-color: #c9d1d9; /* 柔和灰白 */
+        --heading-color: #ffffff; /* 标题亮白 */
+        --link-color: #58a6ff;
+        --border-color: #c9d1d9; /* 表格线变白 */
+        --table-border: #30363d;
+        --quote-border: #30363d;
+
+        /* 代码块：黑夜使用深色背景 */
+        --code-bg-color: #161b22;
+        --code-text-color: #c9d1d9;
+        --code-border: #30363d;
+    }
+}
+
+/* --- 2. 基础容器设置 --- */
+
+body.preview-container {
+    background-color: var(--bg-color);
+}
+.markdown-preview.markdown-preview {
+    font-family: var(--font-main);
+    font-size: var(--base-font-size);
+    line-height: var(--line-height);
+    color: var(--text-color);
+    background-color: var(--bg-color);
+
+    /* 纸张布局 */
+    max-width: var(--page-width);
+    margin: 0 auto !important;
+    padding: 2em 3em;
+    box-sizing: border-box;
+}
+
+/* --- 3. 标题与自动编号 (逻辑完美修复版) --- */
+.markdown-preview.markdown-preview h1,
+.markdown-preview.markdown-preview h2,
+.markdown-preview.markdown-preview h3,
+.markdown-preview.markdown-preview h4,
+.markdown-preview.markdown-preview h5 {
+    font-family: var(--font-main);
+    color: var(--heading-color);
+    font-weight: bold;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    line-height: 1.4;
+    text-align: left;
+    text-indent: 0 !important; /* 标题严禁缩进 */
+}
+
+/* H1: 文档总标题 (不编号) */
+.markdown-preview.markdown-preview h1 {
+    font-size: 2.2em;
+    text-align: center;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5em;
+}
+
+/* H2: 1. (重置 H3) */
+.markdown-preview.markdown-preview h2 {
+    font-size: 1.6em;
+    border-bottom: 1px solid var(--table-border);
+    padding-bottom: 0.3em;
+
+    counter-increment: h2counter;
+    counter-reset: h3counter; /* <--- 关键：进入新章，重置小节 */
+}
+.markdown-preview.markdown-preview h2::before {
+    content: counter(h2counter) ' ';
+    margin-right: 0.5em;
+}
+
+/* H3: 1.1 (重置 H4) */
+.markdown-preview.markdown-preview h3 {
+    font-size: 1.4em;
+
+    counter-increment: h3counter;
+    counter-reset: h4counter; /* <--- 关键：进入新节，重置小小节 */
+}
+.markdown-preview.markdown-preview h3::before {
+    content: counter(h2counter) '.' counter(h3counter) ' ';
+    margin-right: 0.5em;
+}
+
+/* H4: 1.1.1 */
+.markdown-preview.markdown-preview h4 {
+    font-size: 1.2em;
+    counter-increment: h4counter;
+}
+.markdown-preview.markdown-preview h4::before {
+    content: counter(h2counter) '.' counter(h3counter) '.' counter(h4counter) ' ';
+    margin-right: 0.5em;
+}
+
+/* --- 4. 正文排版 --- */
+.markdown-preview.markdown-preview p {
+    text-align: justify;
+    margin-bottom: 1.2em;
+}
+
+/* 排除不需要缩进的元素 */
+.markdown-preview.markdown-preview li p,
+.markdown-preview.markdown-preview blockquote p,
+.markdown-preview.markdown-preview table p {
+    text-indent: 0;
+}
+
+.markdown-preview.markdown-preview strong {
+    font-weight: 900;
+    color: var(--heading-color);
+}
+
+.markdown-preview.markdown-preview a {
+    color: var(--link-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* --- 5. 代码块 (macOS 风格 - 像素级修复版) --- */
+.markdown-preview.markdown-preview pre {
+    font-family: var(--font-code);
+    /* 背景色：跟随变量 (白天浅灰，晚上深灰) */
+    background-color: var(--code-bg-color) !important;
+
+    border: 1px solid var(--code-border);
+    border-radius: 8px;
+    margin: 1.5em 0;
+    padding: 1.2em;
+    padding-top: 38px; /* 顶部留出红绿灯的空间 */
+    text-indent: 0;
+    overflow-x: auto;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 修复 1：使用 CSS 形状绘制红绿灯，不再使用文字，绝对不会乱 */
+.markdown-preview.markdown-preview pre::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ff5f56; /* 红灯 */
+    /* 利用阴影绘制黄灯和绿灯，位置绝对固定 */
+    box-shadow: 18px 0 0 #ffbd2e, 36px 0 0 #27c93f;
+    z-index: 10;
+}
+
+/* 修复 2：强制覆盖代码文字颜色 */
+/* 无论 VS Code 主题传过来什么颜色，必须强制使用我们设定的高对比度颜色 */
+.markdown-preview.markdown-preview pre code,
+.markdown-preview.markdown-preview pre span:not(.token) {
+    color: var(--code-text-color);
+}
+
+.markdown-preview.markdown-preview pre code,
+.markdown-preview.markdown-preview pre span {
+    font-family: var(--font-code) !important;
+    background-color: transparent !important; /* 防止文字自带背景色 */
+    text-shadow: none !important;
+}
+
+/* 行内代码 (Inline Code) */
+.markdown-preview.markdown-preview p code,
+.markdown-preview.markdown-preview li code,
+.markdown-preview.markdown-preview table code {
+    font-family: var(--font-code);
+    background-color: var(--code-bg-color);
+    border: 1px solid var(--code-border);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    margin: 0 2px;
+    /* 强制行内代码颜色为红色/粉色，确保可见 */
+    color: #c7254e !important;
+    font-size: 0.85em;
+}
+
+.markdown-preview.markdown-preview p code::after,
+.markdown-preview.markdown-preview p code::before,
+.markdown-preview.markdown-preview li code::after,
+.markdown-preview.markdown-preview li code::before,
+.markdown-preview.markdown-preview table code::after,
+.markdown-preview.markdown-preview table code::before {
+    content: none !important;
+}
+
+/* 深色模式下行内代码颜色微调 */
+@media (prefers-color-scheme: dark) {
+    .markdown-preview.markdown-preview p code,
+    .markdown-preview.markdown-preview li code {
+        color: #ff7b72 !important;
+    }
+}
+
+/* --- 6. 三线表 (Table) - 修复版 --- */
+.markdown-preview.markdown-preview table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin: 1.5em auto;
+    width: 98%; /* 稍微宽一点，避免拥挤 */
+    font-family: var(--font-main);
+    font-size: 0.95em;
+    text-indent: 0;
+
+    /* 三线表核心：顶底粗线 */
+    border-top: 2px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
+
+    /* 移除表格左右可能存在的默认边框 */
+    border-left: none !important;
+    border-right: none !important;
+}
+
+.markdown-preview.markdown-preview th {
+    /* 表头样式 */
+    font-weight: bold;
+    text-align: left; /* 学术表格通常左对齐或居中，左对齐更易读 */
+    padding: 12px 10px;
+
+    /* 核心修复 1：强制表头文字颜色，防止变白 */
+    color: var(--heading-color) !important;
+
+    /* 核心修复 2：三线表中间的细线 */
+    border-bottom: 1px solid var(--table-border);
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+
+    /* 可选：给表头加一点点极淡的背景，区分度更好，或者用 transparent 保持纯白 */
+    background-color: rgba(127, 127, 127, 0.05);
+}
+
+.markdown-preview.markdown-preview td {
+    padding: 10px;
+    text-align: left;
+
+    /* 核心修复 3：移除所有单元格竖线 */
+    border: none !important;
+    /* 仅保留行与行之间的隐形分割（如果需要行线，可以把下面这行注释解开） */
+    /* border-bottom: 1px solid rgba(0,0,0,0.05); */
+}
+
+/* 斑马纹：隔行变色 (可选，学术论文中有时使用，有时不用) */
+/* 如果想要纯白背景，把下面这块注释掉即可 */
+.markdown-preview.markdown-preview tr:nth-child(even) {
+    background-color: rgba(127, 127, 127, 0.03);
+}
+
+/* 鼠标悬停高亮行 */
+.markdown-preview.markdown-preview tr:hover td {
+    background-color: rgba(127, 127, 127, 0.08);
+}
+
+/* --- 7. 引用 (Blockquote) --- */
+.markdown-preview.markdown-preview blockquote {
+    border-left: 4px solid var(--quote-border);
+    margin: 1.5em 0;
+    padding: 0.8em 1.2em;
+    color: var(--text-color);
+    opacity: 0.85;
+    background-color: var(--code-bg-color); /* 引用使用淡淡的背景 */
+    border-radius: 0 8px 8px 0;
+}
+
+/* --- 8. 列表 (List) --- */
+.markdown-preview.markdown-preview ul,
+.markdown-preview.markdown-preview ol {
+    margin-left: 2em;
+    padding-left: 0;
+    text-indent: 0;
+}
+
+.markdown-preview.markdown-preview li {
+    margin-bottom: 0.5em;
+}
+
+/* --- 9. 数学公式 --- */
+.markdown-preview.markdown-preview .katex-display {
+    margin: 1em 0;
+    overflow-x: auto;
+    text-indent: 0;
+}
+
+/* --- 10. 打印优化 --- */
+@media print {
+    .markdown-preview.markdown-preview {
+        padding: 0;
+        box-shadow: none;
+        max-width: 100%;
+        --bg-color: #fff;
+        --text-color: #000;
+    }
+    .markdown-preview.markdown-preview pre {
+        background-color: #f5f5f5;
+        border: 1px solid #ccc;
+        /* 打印时去掉装饰点，省墨 */
+        padding-top: 1em;
+    }
+    .markdown-preview.markdown-preview pre::before {
+        display: none;
+    }
+    .markdown-preview.markdown-preview a {
+        color: #000;
+        text-decoration: none;
+    }
+}
+
+/* ==========================================================================
+   Ayu Theme Variables (Light & Dark)
+   ========================================================================== */
+:root {
+    /* --- Ayu Light (Default) --- */
+    --ayu-bg: #f8f9fa; /* editor.background */
+    --ayu-fg: #5c6166; /* editor.foreground */
+    --ayu-border: #f8f9fa; /* editor.border / similar */
+    --ayu-selection: #035bd626; /* editor.selectionBackground */
+
+    --ayu-comment: #787b8099; /* comment */
+    --ayu-punctuation: #5c6166b3; /* punctuation.separator */
+    --ayu-tag: #55b4d4; /* entity.name.tag */
+    --ayu-string: #86b300; /* string */
+    --ayu-keyword: #fa8d3e; /* keyword */
+    --ayu-operator: #ed9366; /* keyword.operator */
+    --ayu-function: #f2ae49; /* entity.name.function */
+    --ayu-number: #a37acc; /* constant.numeric */
+    --ayu-class: #399ee6; /* entity.name */
+    --ayu-constant: #a37acc; /* constant.language */
+    --ayu-attr-name: #f2ae49; /* entity.other.attribute-name */
+    --ayu-regex: #4cbf99; /* string.regexp */
+
+    --ayu-line-highlight: #8a91991a; /* editor.lineHighlightBackground */
+}
+
+/* --- Ayu Dark (Override) --- */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ayu-bg: #0b0e14;
+        --ayu-fg: #bfbdb6;
+        --ayu-border: #11151c;
+        --ayu-selection: #409fff4d;
+
+        --ayu-comment: #acb6bf8c;
+        --ayu-punctuation: #bfbdb6b3;
+        --ayu-tag: #39bae6;
+        --ayu-string: #aad94c;
+        --ayu-keyword: #ff8f40;
+        --ayu-operator: #f29668;
+        --ayu-function: #ffb454;
+        --ayu-number: #d2a6ff;
+        --ayu-class: #59c2ff;
+        --ayu-constant: #d2a6ff;
+        --ayu-attr-name: #ffb454;
+        --ayu-regex: #95e6cb;
+
+        --ayu-line-highlight: #131721;
+    }
+}
+
+/* 支持手动切换：在 html 或 body 上添加 class="dark" 或 data-theme="dark" */
+[data-theme='dark'],
+.dark {
+    --ayu-bg: #0b0e14;
+    --ayu-fg: #bfbdb6;
+    --ayu-border: #11151c;
+    --ayu-selection: #409fff4d;
+    --ayu-comment: #acb6bf8c;
+    --ayu-punctuation: #bfbdb6b3;
+    --ayu-tag: #39bae6;
+    --ayu-string: #aad94c;
+    --ayu-keyword: #ff8f40;
+    --ayu-operator: #f29668;
+    --ayu-function: #ffb454;
+    --ayu-number: #d2a6ff;
+    --ayu-class: #59c2ff;
+    --ayu-constant: #d2a6ff;
+    --ayu-attr-name: #ffb454;
+    --ayu-regex: #95e6cb;
+    --ayu-line-highlight: #131721;
+}
+
+/* ==========================================================================
+   PrismJS / Code Block Styles
+   ========================================================================== */
+
+pre {
+    font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+    direction: ltr;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    padding: 1em;
+    margin: 0.5em 0px;
+    overflow: auto;
+    line-height: 1.5;
+    tab-size: 4;
+    hyphens: none;
+
+    /* 使用变量 */
+    color: var(--ayu-fg);
+    border: 1px solid var(--ayu-border);
+    border-radius: 3px;
+    background-color: var(--ayu-bg) !important;
+
+    /* 选中文本背景 */
+    ::selection {
+        background: var(--ayu-selection);
+    }
+}
+
+pre[class*='language-'] {
+    padding: 1em;
+}
+
+/* Comments, CDATA, Doctype */
+code[class*='language-'] .token.cdata,
+code[class*='language-'] .token.comment,
+code[class*='language-'] .token.doctype,
+code[class*='language-'] .token.prolog,
+pre[class*='language-'] .token.cdata,
+pre[class*='language-'] .token.comment,
+pre[class*='language-'] .token.doctype,
+pre[class*='language-'] .token.prolog {
+    color: var(--ayu-comment);
+    font-style: italic;
+}
+
+/* Namespace */
+code[class*='language-'] .namespace,
+pre[class*='language-'] .namespace {
+    opacity: 0.7;
+}
+
+/* Constants */
+code[class*='language-'] .token.constant,
+pre[class*='language-'] .token.constant {
+    color: var(--ayu-constant);
+}
+
+/* Numbers, Booleans, Function Names (Legacy grouping) */
+code[class*='language-'] .token.boolean,
+code[class*='language-'] .token.number,
+pre[class*='language-'] .token.boolean,
+pre[class*='language-'] .token.number {
+    color: var(--ayu-number);
+}
+
+code[class*='language-'] .token.function-name,
+pre[class*='language-'] .token.function-name {
+    color: var(--ayu-function);
+}
+
+/* Tags */
+code[class*='language-'] .token.tag,
+pre[class*='language-'] .token.tag {
+    color: var(--ayu-tag);
+}
+
+/* Symbols */
+code[class*='language-'] .token.symbol,
+pre[class*='language-'] .token.symbol {
+    color: var(--ayu-constant);
+}
+
+/* Selectors */
+code[class*='language-'] .token.selector,
+pre[class*='language-'] .token.selector {
+    color: var(--ayu-keyword);
+}
+
+/* Attribute Names */
+code[class*='language-'] .token.attr-name,
+pre[class*='language-'] .token.attr-name {
+    color: var(--ayu-attr-name);
+}
+
+/* Strings */
+code[class*='language-'] .token.string,
+pre[class*='language-'] .token.string {
+    color: var(--ayu-string);
+}
+
+/* Char, URL */
+code[class*='language-'] .token.char,
+pre[class*='language-'] .token.char,
+code[class*='language-'] .token.url,
+pre[class*='language-'] .token.url {
+    color: var(--ayu-string);
+}
+
+/* Operators */
+code[class*='language-'] .token.operator,
+pre[class*='language-'] .token.operator {
+    color: var(--ayu-operator);
+}
+
+/* Keywords, At-rules, Attr-values */
+code[class*='language-'] .token.keyword,
+pre[class*='language-'] .token.keyword,
+code[class*='language-'] .token.atrule,
+pre[class*='language-'] .token.atrule {
+    color: var(--ayu-keyword);
+}
+
+code[class*='language-'] .token.attr-value,
+pre[class*='language-'] .token.attr-value {
+    color: var(--ayu-string);
+}
+
+/* Functions */
+code[class*='language-'] .token.function,
+pre[class*='language-'] .token.function {
+    color: var(--ayu-function);
+}
+
+/* Class Names */
+code[class*='language-'] .token.class-name,
+pre[class*='language-'] .token.class-name {
+    color: var(--ayu-class);
+}
+
+/* Variables */
+code[class*='language-'] .token.variable,
+pre[class*='language-'] .token.variable {
+    color: var(--ayu-fg);
+}
+
+/* Regex */
+code[class*='language-'] .token.regex,
+pre[class*='language-'] .token.regex {
+    color: var(--ayu-regex);
+}
+
+/* Important, Bold */
+code[class*='language-'] .token.important,
+pre[class*='language-'] .token.important,
+code[class*='language-'] .token.bold,
+pre[class*='language-'] .token.bold {
+    color: var(--ayu-keyword);
+    font-weight: 700;
+}
+
+/* Italic */
+code[class*='language-'] .token.italic,
+pre[class*='language-'] .token.italic {
+    font-style: italic;
+}
+
+/* Entity */
+code[class*='language-'] .token.entity,
+pre[class*='language-'] .token.entity {
+    cursor: help;
+}
+
+/* Line Highlighting */
+pre[data-line] {
+    position: relative;
+    padding: 1em 0px 1em 3em;
+}
+
+pre[data-line] .line-highlight-wrapper {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: transparent;
+    display: block;
+    width: 100%;
+}
+
+pre[data-line] .line-highlight {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    margin-top: 1em;
+    background: var(--ayu-line-highlight); /* 使用变量 */
+    pointer-events: none;
+    line-height: inherit;
+    white-space: pre;
+}
+
+pre[data-line] .line-highlight::before,
+pre[data-line] .line-highlight[data-end]::after {
+    content: attr(data-start);
+    position: absolute;
+    top: 0.4em;
+    left: 0.6em;
+    min-width: 1em;
+    padding: 0px 0.5em;
+    background-color: var(--ayu-comment); /* 使用注释色作为行号背景 */
+    color: var(--ayu-bg);
+    font: bold 65% / 1.5 sans-serif;
+    text-align: center;
+    vertical-align: 0.3em;
+    border-radius: 999px;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+pre[data-line] .line-highlight[data-end]::after {
+    content: attr(data-end);
+    top: auto;
+    bottom: 0.4em;
+}
