@@ -207,9 +207,10 @@ body.preview-container {
 }
 
 /* 行内代码 (Inline Code) */
-.markdown-preview.markdown-preview p code,
-.markdown-preview.markdown-preview li code,
-.markdown-preview.markdown-preview table code {
+.markdown-preview.markdown-preview p:not([data-role='codeBlock']) > code,
+.markdown-preview.markdown-preview p *:not([data-role='codeBlock']) > code,
+.markdown-preview.markdown-preview li *:not([data-role='codeBlock']) > code,
+.markdown-preview.markdown-preview table *:not([data-role='codeBlock']) > code {
     font-family: var(--font-code);
     background-color: var(--code-bg-color);
     border: 1px solid var(--code-border);
