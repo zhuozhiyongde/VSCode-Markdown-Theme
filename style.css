@@ -219,8 +219,6 @@ body.preview-container {
     padding: 0.2em 0.4em;
     border-radius: 4px;
     margin: 0 2px;
-    /* 强制行内代码颜色为红色/粉色，确保可见 */
-    color: #c7254e !important;
     font-size: 0.85em;
 }
 
@@ -235,8 +233,12 @@ body.preview-container {
 
 /* 深色模式下行内代码颜色微调 */
 @media (prefers-color-scheme: dark) {
-    .markdown-preview.markdown-preview p code,
-    .markdown-preview.markdown-preview li code {
+    .markdown-preview.markdown-preview p:not([data-role='codeBlock']) > code,
+    .markdown-preview.markdown-preview p *:not([data-role='codeBlock']) > code,
+    .markdown-preview.markdown-preview li:not([data-role='codeBlock']) > code,
+    .markdown-preview.markdown-preview li *:not([data-role='codeBlock']) > code,
+    .markdown-preview.markdown-preview table:not([data-role='codeBlock']) > code,
+    .markdown-preview.markdown-preview table *:not([data-role='codeBlock']) > code {
         color: #ff7b72 !important;
     }
 }
