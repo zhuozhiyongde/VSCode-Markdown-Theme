@@ -32,7 +32,7 @@
 
     /* 代码块：白天使用浅灰背景，类似 GitHub */
     --code-bg-color: #f6f8fa;
-    --code-text-color: #24292f;
+    --code-text-color: #65be9a;
     --code-border: #d0d7de;
 
     /* 计数器初始化 */
@@ -52,7 +52,7 @@
 
         /* 代码块：黑夜使用深色背景 */
         --code-bg-color: #161b22;
-        --code-text-color: #c9d1d9;
+        --code-text-color: #bfbdb6;
         --code-border: #30363d;
     }
 }
@@ -651,4 +651,14 @@ pre[data-line] .line-highlight[data-end]::after {
     content: attr(data-end);
     top: auto;
     bottom: 0.4em;
+}
+
+.token.boolean,
+.token.constant,
+.token.deleted,
+.token.number,
+.token.property,
+.token.symbol,
+.token.tag {
+    color: var(--ayu-attr-name);
 }
